@@ -33,6 +33,8 @@ class SensorDataApiController extends Controller
         //     'berat'=>'required|numeric',
         //     'lampu'=>'required|boolean',
         // ]);
+        // 
+        // 
 
         if((is_numeric($suhu) && is_numeric($berat) && ($lampu==1 || $lampu==0))!=True){
             return response()->json(['message' => 'bad request'], 403);
