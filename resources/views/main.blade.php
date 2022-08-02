@@ -123,10 +123,10 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 col-lg-3">
+                        <div class="col-6 col-lg-3">
                             test
                         </div>
-                        <div class="col-md-6 col-lg-3">
+                        <div class="col-6 col-lg-3">
                             test
                         </div>
                     </div>
