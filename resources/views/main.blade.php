@@ -279,4 +279,29 @@
       rangeBerat
     );
 </script>
+<script>
+    function startLiveUpdate(){
+        // DeviceInfo
+        TextonOffStatus=document.getElementById('onOffStatus');
+        TextlastRequestDate=document.getElementById('lastRequestDate');
+        TextlastRequestTime=document.getElementById('lastRequestTime');
+        
+        // Data Hari ini
+        TextcurrentDate=document.getElementById('currentDate');
+        TextcurrentSuhu=document.getElementById('currentSuhu');
+        TextcurrentBerat=document.getElementById('currentBerat');
+        TextcurrentLampu=document.getElementById('currentLampu');
+        setInterval(() => {
+            fetch('{{ route('livedata') }}')
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error('Error:', error));
+        }, 2000);
+        
+    }
+
+    document.addEventListener('DOMContentLoaded',function(){
+        startLiveUpdate()
+    }) 
+</script>
 @endsection

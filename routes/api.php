@@ -22,5 +22,5 @@ use App\Http\Controllers\NonRefreshController;
 Route::get('/index',[SensorDataApiController::class,'index']);
 Route::get('/showlatest',[SensorDataApiController::class,'showlatest']);
 Route::get('/show/{sensordata}',[SensorDataApiController::class,'show']);
-Route::get('/livedata',[NonRefreshController::class,'livedata']);
+Route::get('/livedata',[NonRefreshController::class,'livedata'])->name('livedata');
 Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);
