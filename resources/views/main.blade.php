@@ -122,19 +122,22 @@
                   Graph Range
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <form action="" method="get" class="row">
                         <div class="col-6 col-lg-3">
-                            test
+                            <label for="fromdate" class="form-label">From Date :</label>
+                            <input type="date" class="form-control" id="fromdate" value="2011-09-29">
                         </div>
                         <div class="col-6 col-lg-3">
-                            test
+                            <label for="todate" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="todate" value="2011-09-29">
                         </div>
-                    </div>
+                        <div class="col-12 col-lg-2 align-self-end">
+                            <label for="sumbit" class="form-label d-none"></label>
+                            <button type="submit" class="btn btn-success w-100 mb-lg-0 mb-3 mt-lg-0 mt-3 text-light">Filter</button>
+                        </div>
+                    </form>
                     <div class="row mt-2">
                         <div class="row justify-content-center">
-                            {{-- <div>
-                                <canvas id="myChart"></canvas>
-                            </div> --}}
                             <div class="col-xl-6">
                                 <div class="chart-hariini mt-2">
                                     <canvas id="myChart3"></canvas>
