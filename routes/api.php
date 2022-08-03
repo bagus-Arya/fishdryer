@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SensorDataApiController;
+use App\Http\Controllers\NonRefreshController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,6 +19,8 @@ use App\Http\Controllers\SensorDataApiController;
 //     return $request->user();
 // });
 
-Route::get('/index/{apikey}',[SensorDataApiController::class,'index']);
-Route::get('/show/{apikey}/{sensordata}',[SensorDataApiController::class,'show']);
+Route::get('/index',[SensorDataApiController::class,'index']);
+Route::get('/showlatest',[SensorDataApiController::class,'showlatest']);
+Route::get('/show/{sensordata}',[SensorDataApiController::class,'show']);
+Route::get('/livedata',[NonRefreshController::class,'livedata']);
 Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);

@@ -10,21 +10,20 @@ use Illuminate\Validation\Rule;
 
 class SensorDataApiController extends Controller
 {
-    public function index($apikey){
-        $DeviceId=Device::where('api_key',$apikey)->first()->id;
-        if(!$DeviceId){
-            return response()->json(['message' => 'unautenticated'], 401);
-        }
+    public function index(){
+        $DeviceId=Device::find(1)->id;
         return Sensordata::where('device_id',$DeviceId)->orderBy('created_at', 'asc')
         ->simplePaginate(10)->withQueryString();
     }
 
-    public function show($apikey,Sensordata $sensordata){
-        $DeviceId=Device::where('api_key',$apikey)->first()->id;
-        if(!$DeviceId){
-            return response()->json(['message' => 'unautenticated'], 401);
-        }
+    public function show(Sensordata $sensordata){
+        $DeviceId=Device::find(1)->id;
         return Sensordata::where('device_id',$DeviceId)->where('id',$sensordata->id)->firstOrFail();
+    }
+
+    public function showlatest(){
+        $DeviceId=Device::find(1)->id;
+        return Sensordata::where('device_id',$DeviceId)->orderBy('created_at','DESC')->first();
     }
 
     public function store($apikey,$suhu,$berat,$lampu){
@@ -41,7 +40,10 @@ class SensorDataApiController extends Controller
         }
 
 
-        $DeviceId=Device::where('api_key',$apikey)->first()->id;
+        $Device=Device::where('api_key',$apikey)->first();
+        $Device->touch();
+        $DeviceId= $Device->id;
+
         if(!$DeviceId){
             return response()->json(['message' => 'unautenticated'], 401);
         }

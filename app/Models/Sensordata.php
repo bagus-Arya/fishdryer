@@ -14,4 +14,16 @@ class Sensordata extends Model
         'lampu',
         'device_id',
     ];
+    // public function getFullNameAttribute()
+    // { 
+    //   return "{$this->first_name} {$this->last_name}";
+    // }
+    public function setBeratAttribute($value)
+    {
+        $this->attributes['berat'] =round($value/1000, 2) ;
+    }
+    public function setSuhuAttribute($value)
+    {
+        $this->attributes['suhu'] =round($value, 2) ;
+    }
 }

@@ -10,14 +10,19 @@
                 </div>
                 <div class="card-body">
                     <div class="row justify-content-center">
-                        <div class="dot-device-status">
-                            <span>ON</span>
+                        <div class="dot-device-status {{ $DeviceInfos->online_status ? 'green' : 'red' }}" id="onOffStatus">
+                            @if ($DeviceInfos->online_status)
+                                ON
+                            @else
+                                OFF
+                            @endif
                         </div>
                     </div>
                     <div class="row mt-2">
                         <i class="fa-solid fa-calendar-clock"></i>
-                        <p class="card-text mb-0 mt-12"><i class="fa-solid fa-calendar-days"></i> Last Request : May 12,2022</p>
-                        <p class="card-text mb-0"><i class="fa-solid fa-clock"></i> Time : 20:30</p>
+                        <p class="card-text mb-0 mt-12"><i class="fa-solid fa-calendar-days"></i> Last Request : <span id="lastRequestDate">{{ \Carbon\Carbon::parse($DeviceInfos->updated_at)->format('M d,Y')}}</span></p>
+                        <p class="card-text mb-0"><i class="fa-solid fa-clock"></i> Time : <span id="lastRequestTime">{{ \Carbon\Carbon::parse($DeviceInfos->updated_at)->format('H:i')}}</span></p>
+                        
                     </div>
                 </div>
               </div>
@@ -30,7 +35,7 @@
                 <div class="card-body">
                   <div class="container-fluid">
                     <div class="row">
-                        <p class="card-text mb-2"><i class="fa-solid fa-calendar-days"></i> Date : May 12,2022</p>
+                        <p class="card-text mb-2"><i class="fa-solid fa-calendar-days"></i> Date : <span id="currentDate">{{ \Carbon\Carbon::parse($DateNow)->format('M d,Y') }}</span> </p>
                     </div>
                     <div class="row justify-content-center">
                         <div class="col-sm-6 col-lg-4">
@@ -41,8 +46,8 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row justify-content-center">
-                                        <div class="dot-device-suhuberat blue">
-                                            30 C
+                                        <div class="dot-device-suhuberat blue" id="currentSuhu">
+                                            {{ $todayData->suhu }} C
                                         </div>
                                     </div>
                                 </div>
@@ -56,8 +61,8 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row justify-content-center">
-                                        <div class="dot-device-suhuberat yellow">
-                                            0.25 kg
+                                        <div class="dot-device-suhuberat yellow" id="currentBerat">
+                                            {{ $todayData->berat }} kg
                                         </div>
                                     </div>
                                 </div>
@@ -71,8 +76,8 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row justify-content-center">
-                                        <div class="dot-device-suhuberat green">
-                                            ON
+                                        <div class="dot-device-suhuberat {{ $DeviceInfos->online_status ? 'green' : 'red' }}" id="currentLampu">
+                                            {{ $DeviceInfos->online_status ? 'ON' : 'OFF' }}
                                         </div>
                                     </div>
                                 </div>
@@ -96,13 +101,13 @@
                                     </div> --}}
                                     <div class="col-xl-6">
                                         <div class="chart-hariini mt-2">
-                                            <canvas id="myChart"></canvas>
+                                            <canvas id="currentSuhuChart"></canvas>
                                         </div>
                                         
                                     </div>
                                     <div class="col-xl-6">
                                         <div class="chart-hariini mt-2">
-                                            <canvas id="myChart2"></canvas>
+                                            <canvas id="currentBeratChart"></canvas>
                                         </div>
                                     </div>
                                 </div>
@@ -122,28 +127,31 @@
                   Graph Range
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <form action="" method="get" class="row">
                         <div class="col-6 col-lg-3">
-                            test
+                            <label for="fromdate" class="form-label">From Date :</label>
+                            <input type="date" class="form-control" id="fromdate" value="{{ \Carbon\Carbon::today()->subDays(7)->format('Y-m-d') }}">
                         </div>
                         <div class="col-6 col-lg-3">
-                            test
+                            <label for="todate" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="todate" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}">
                         </div>
-                    </div>
+                        <div class="col-12 col-lg-2 align-self-end">
+                            <label for="sumbit" class="form-label d-none"></label>
+                            <button type="submit" class="btn btn-success w-100 mb-lg-0 mb-3 mt-lg-0 mt-3 text-light">Filter</button>
+                        </div>
+                    </form>
                     <div class="row mt-2">
                         <div class="row justify-content-center">
-                            {{-- <div>
-                                <canvas id="myChart"></canvas>
-                            </div> --}}
                             <div class="col-xl-6">
                                 <div class="chart-hariini mt-2">
-                                    <canvas id="myChart3"></canvas>
+                                    <canvas id="rangeSuhu"></canvas>
                                 </div>
                                 
                             </div>
                             <div class="col-xl-6">
                                 <div class="chart-hariini mt-2">
-                                    <canvas id="myChart4"></canvas>
+                                    <canvas id="rangeBerat"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -165,50 +173,110 @@
 </div>
 
 <script>
-    const labels = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-    ];
-  
-    const data = {
-      labels: labels,
-      datasets: [{
-        label: 'My First dataset',
-        backgroundColor: 'rgb(255, 99, 132)',
-        borderColor: 'rgb(255, 99, 132)',
-        data: [0, 10, 5, 2, 20, 30, 45],
-      }]
-    };
-  
-    const config = {
-      type: 'line',
-      data: data,
-      options: {
-        responsive:true,
-        maintainAspectRatio:false
-      }
-    };
+    const currentSuhu={
+        type: 'line',
+        data:{
+            datasets: @json($todayGraphSuhu)
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit:'second'
+                    }
+                    },
+                y:{
+                    min:0
+                }
+            }
+        }
+    }
+
+    const currentBerat={
+        type: 'line',
+        data:{
+            datasets: @json($todayGraphBerat)
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit:'second'
+                    }
+                    },
+                y:{
+                    min:0
+                }
+            }
+        }
+    }
+
+    const rangeSuhu={
+        type: 'line',
+        data:{
+            datasets: @json($rangeGraphSuhu)
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit:'day'
+                    }
+                    },
+                y:{
+                    min:0
+                }
+            }
+        }
+    }
+
+    const rangeBerat={
+        type: 'line',
+        data:{
+            datasets: @json($rangeGraphBerat)
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit:'day'
+                    }
+                    },
+                y:{
+                    min:0
+                }
+            }
+        }
+    }
 </script>
 <script>
     const myChart = new Chart(
-      document.getElementById('myChart'),
-      config
+      document.getElementById('currentSuhuChart'),
+      currentSuhu
     );
     const myChart2 = new Chart(
-      document.getElementById('myChart2'),
-      config
+      document.getElementById('currentBeratChart'),
+      currentBerat
     );
     const myChart3 = new Chart(
-      document.getElementById('myChart3'),
-      config
+      document.getElementById('rangeSuhu'),
+      rangeSuhu
     );
     const myChart4 = new Chart(
-      document.getElementById('myChart4'),
-      config
+      document.getElementById('rangeBerat'),
+      rangeBerat
     );
 </script>
 @endsection
