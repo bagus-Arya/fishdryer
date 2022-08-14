@@ -127,7 +127,7 @@
                   Graph Range
                 </div>
                 <div class="card-body">
-                    <form action="" method="get" class="row">
+                    <div class="row">
                         <div class="col-6 col-lg-3">
                             <label for="fromdate" class="form-label">From Date :</label>
                             <input type="date" class="form-control" id="fromdate" value="{{ \Carbon\Carbon::today()->subDays(7)->format('Y-m-d') }}">
@@ -138,9 +138,9 @@
                         </div>
                         <div class="col-12 col-lg-2 align-self-end">
                             <label for="sumbit" class="form-label d-none"></label>
-                            <button type="submit" class="btn btn-success w-100 mb-lg-0 mb-3 mt-lg-0 mt-3 text-light">Filter</button>
+                            <button id='submit' class="btn btn-success w-100 mb-lg-0 mb-3 mt-lg-0 mt-3 text-light">Filter</button>
                         </div>
-                    </form>
+                    </div>
                     <div class="row mt-2">
                         <div class="row justify-content-center">
                             <div class="col-xl-6">
@@ -291,10 +291,77 @@
         TextcurrentSuhu=document.getElementById('currentSuhu');
         TextcurrentBerat=document.getElementById('currentBerat');
         TextcurrentLampu=document.getElementById('currentLampu');
+
+
+        // button listener and filter date
+        buttonSubmit=document.getElementById('submit');
+        buttonSubmit.addEventListener("click", ()=>{
+            basicUrl='{{ route('livesearch') }}'
+            fromDate=document.getElementById('fromdate').value;
+            toDate=document.getElementById('todate').value;
+            livesearchurl=basicUrl+'?from_date='+fromDate+'&to_date='+toDate
+            fetch(livesearchurl)
+            .then((response) => response.json())
+            .then((data) => {
+                    console.log(data)
+                    myChart3.data.datasets.pop()
+                    myChart3.data.datasets[0]=data.rangeGraphSuhu
+                    myChart3.options.animation.duration=0
+                    myChart3.update()
+
+                    myChart4.data.datasets.pop()
+                    myChart4.data.datasets[0]=data.rangeGraphBerat
+                    myChart4.options.animation.duration=0
+                    myChart4.update()
+                }
+            )
+            .catch((error) => console.error('Error:', error));
+        });
         setInterval(() => {
             fetch('{{ route('livedata') }}')
             .then((response) => response.json())
-            .then((data) => console.log(data))
+            .then((data) => {
+                    //Device Info 
+                    if(data.DeviceInfos.online_status==false){
+                        TextonOffStatus.textContent='OFF'
+                        TextonOffStatus.classList.remove("green");
+                        TextonOffStatus.classList.add("red");
+                    }
+                    else{
+                        TextonOffStatus.textContent='ON'
+                        TextonOffStatus.classList.remove("red");
+                        TextonOffStatus.classList.add("green");
+                    }
+                    TextlastRequestDate.textContent=moment(data.DeviceInfos.updated_at).format('MMM DD,YYYY')
+                    TextlastRequestTime.textContent=moment(data.DeviceInfos.updated_at).format('HH:mm')
+
+                    // Data Hari Ini
+                    TextcurrentDate.textContent=moment(data.DateNow).format('MMM DD,YYYY')
+                    TextcurrentSuhu.textContent=data.todayData.suhu+' C'
+                    TextcurrentBerat.textContent=data.todayData.berat+' kg'
+                    if(data.todayData.lampu==0){
+                        TextcurrentLampu.textContent='OFF'
+                        TextcurrentLampu.classList.remove("green");
+                        TextcurrentLampu.classList.add("red");
+                    }
+                    else{
+                        TextcurrentLampu.textContent='ON'
+                        TextcurrentLampu.classList.remove("red");
+                        TextcurrentLampu.classList.add("green");
+                    }
+                    
+                    myChart.data.datasets.pop()
+                    myChart.data.datasets[0]=data.todayGraphSuhu
+                    myChart.options.animation.duration=0
+                    myChart.update()
+
+                    myChart2.data.datasets.pop()
+                    myChart2.data.datasets[0]=data.todayGraphBerat
+                    myChart2.options.animation.duration=0
+                    myChart2.update()
+                    buttonSubmit.click()
+                }
+            )
             .catch((error) => console.error('Error:', error));
         }, 2000);
         

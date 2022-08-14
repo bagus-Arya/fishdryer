@@ -20,8 +20,8 @@ class MainController extends Controller
                 "berat"=> 'NaN',
                 "lampu"=> 'NaN',
             ];
+            $todayData=(object)$todayData;
         }
-
         $todayGraphDatas=Sensordata::whereDate('created_at', Carbon::today())->orderBy('created_at','DESC')->limit(10)->get();
         $todayGraphSuhuDatas=[];
         $todayGraphBeratDatas=[];

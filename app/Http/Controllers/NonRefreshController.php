@@ -22,6 +22,7 @@ class NonRefreshController extends Controller
                 "berat"=> 'NaN',
                 "lampu"=> 'NaN',
             ];
+            $todayData=(object)$todayData;
         }
 
         $todayGraphDatas=Sensordata::whereDate('created_at', Carbon::today())->orderBy('created_at','DESC')->limit(10)->get();
@@ -38,26 +39,86 @@ class NonRefreshController extends Controller
             ]);
         }
 
-        $todayGraphSuhu=[[
+        $todayGraphSuhu=[
             "label"=>"Suhu",
             "backgroundcolor"=>"rgb(13,110,253)",
             "borderColor"=>"rgb(13,110,253)",
             "data"=>$todayGraphSuhuDatas
-        ]];
+        ];
 
-        $todayGraphBerat=[[
+        $todayGraphBerat=[
             "label"=>"Berat",
             "backgroundcolor"=>"rgb(255,193,7)",
             "borderColor"=>"rgb(255,193,7)",
             "data"=>$todayGraphBeratDatas
-        ]];
+        ];
 
 
         return [
             'DeviceInfos'=>$DeviceInfos,
             'DateNow'=>$DateNow,
-            'todayGraphSuhu'=>$todayGraphBerat,
+            'todayData'=>$todayData,
+            'todayGraphSuhu'=>$todayGraphSuhu,
             'todayGraphBerat'=>$todayGraphBerat
         ];
+    }
+
+    public function livesearch(Request $request){
+        try {
+            $request['from_date']=\Carbon\Carbon::parse($request['from_date'])->format('Y-m-d');
+            $request['to_date']=\Carbon\Carbon::parse($request['to_date'])->format('Y-m-d');
+          
+            $rangeGraphSuhuDatas=[];
+            $rangeGraphBeratDatas=[];
+            $from_date= $request['from_date'];
+            $to_date=$request['to_date'];
+
+            $rangeGraphDatas=Sensordata::whereDate('created_at', '>=', $from_date)
+            ->whereDate('created_at', '<=', $to_date)->get();
+
+            while (strtotime($from_date) <= strtotime($to_date)){
+                $fecthDataSensor=Sensordata::whereDate('created_at',$from_date)->get();
+                $averageSuhu=0;
+                $averageBerat=0;
+                foreach($fecthDataSensor as $key=>$dataSensor){
+                    $averageSuhu+=$dataSensor->suhu;
+                    $averageBerat+=$dataSensor->berat;
+                    if( $key+1==$fecthDataSensor->count() ) {
+                        $averageSuhu=$averageSuhu/$fecthDataSensor->count();
+                        $averageBerat=$averageBerat/$fecthDataSensor->count();
+                    }
+                }
+                array_push($rangeGraphSuhuDatas,[
+                    'x'=>$from_date,
+                    'y'=>$averageSuhu
+                ]);
+                array_push($rangeGraphBeratDatas,[
+                    'x'=>$from_date,
+                    'y'=>$averageBerat
+                ]);
+                $from_date = date ("Y-m-d", strtotime("+1 days", strtotime($from_date)));
+            }
+
+            $rangeGraphSuhu=[
+                "label"=>"Suhu",
+                "backgroundcolor"=>"rgb(13,110,253)",
+                "borderColor"=>"rgb(13,110,253)",
+                "data"=>$rangeGraphSuhuDatas
+            ];
+
+            $rangeGraphBerat=[
+                "label"=>"Berat",
+                "backgroundcolor"=>"rgb(255,193,7)",
+                "borderColor"=>"rgb(255,193,7)",
+                "data"=>$rangeGraphBeratDatas
+            ];
+            // return ['message'=>'hi'];
+            return [
+                'rangeGraphSuhu'=>$rangeGraphSuhu,
+                'rangeGraphBerat'=>$rangeGraphBerat
+            ];
+        } catch (\Throwable $th) {
+            return abort(500);
+        }
     }
 }
