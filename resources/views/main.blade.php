@@ -77,7 +77,14 @@
                                 <div class="card-body">
                                     <div class="row justify-content-center">
                                         <div class="dot-device-suhuberat {{ $DeviceInfos->online_status ? 'green' : 'red' }}" id="currentLampu">
-                                            {{ $DeviceInfos->online_status ? 'ON' : 'OFF' }}
+                                            {{-- {{ $DeviceInfos->online_status ? 'ON' : 'OFF' }} --}}
+                                            @if ($todayData->lampu==1)
+                                                ON
+                                            @elseif ($todayData->lampu==0)
+                                                OFF
+                                            @else
+                                                NaN
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -344,10 +351,15 @@
                         TextcurrentLampu.classList.remove("green");
                         TextcurrentLampu.classList.add("red");
                     }
-                    else{
+                    else if (data.todayData.lampu==1){
                         TextcurrentLampu.textContent='ON'
                         TextcurrentLampu.classList.remove("red");
                         TextcurrentLampu.classList.add("green");
+                    }
+                    else{
+                        TextcurrentLampu.textContent='NaN'
+                        TextcurrentLampu.classList.remove("green");
+                        TextcurrentLampu.classList.add("red");
                     }
                     
                     myChart.data.datasets.pop()
