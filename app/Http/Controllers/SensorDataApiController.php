@@ -55,4 +55,29 @@ class SensorDataApiController extends Controller
             'lampu'=>$lampu,
         ]);    
     }
+    public function poststore(Request $request){
+        $validate = $request->validate([
+            'api_key'=>[
+                'required',
+                'string',
+                'exists:devices,api_key'
+            ],
+            'suhu'=>'required|numeric',
+            'berat'=>'required|numeric',
+            'lampu'=>'required|boolean',
+        ]);
+
+
+
+        $Device=Device::where('api_key',$validate['api_key'])->first();
+        $Device->touch();
+        $DeviceId= $Device->id;
+        
+        return Sensordata::create([
+            'device_id'=>$DeviceId,
+            'suhu'=>$validate['suhu'],
+            'berat'=>$validate['berat'],
+            'lampu'=>$validate['lampu'],
+        ]);    
+    }
 }

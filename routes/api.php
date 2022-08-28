@@ -25,3 +25,4 @@ Route::get('/show/{sensordata}',[SensorDataApiController::class,'show']);
 Route::get('/livedata',[NonRefreshController::class,'livedata'])->name('livedata');
 Route::get('/livesearch',[NonRefreshController::class,'livesearch'])->name('livesearch');
 Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);
+Route::post('/store',[SensorDataApiController::class,'poststore']);
