@@ -168,6 +168,7 @@ void getReq(String url){
 
 void loop()
 {
-  getReq(getURL);
+  // getReq(getURL);
+  postReq(postURL,api_key,11,900,1);
   delay(1000);
 }
