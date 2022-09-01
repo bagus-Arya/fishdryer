@@ -134,7 +134,7 @@ void send_data(const char * suhu, const char * berat){
   delay(2000);
   SIM900.println(F("AT+CIPSEND"));
   delay(2000);
-  SIM900.println("POST /api/logdata/store HTTP/1.1\r\nHost:http://203.142.74.174:3280\r\nAccept: application/vnd.api+json\r\nContent-Length: 224\r\nContent-Type: application/vnd.api+json\r\n{\r\n\"device\":\"F001\",\r\n\"suhu\":\""+String(suhu)+"\",\r\n\"berat\":"+String(berat)+",\r\n\"state_lampu\":\"1\"\r\n}\r\n\x1A");
+  SIM900.println("POST /api/logdata/store HTTP/1.1\r\nHost:203.142.74.174:3280\r\nAccept: application/vnd.api+json\r\nContent-Length: 224\r\nContent-Type: application/vnd.api+json\r\n\r\n{\r\n\"data\":{\r\n\"device\":\"F001\",\r\n\"suhu\":\""+String(suhu)+"\",\r\n\"berat\":"+String(berat)+",\r\n\"state_lampu\":\"1\"\r\n}\r\n}\r\n\x1A");
   delay(9000); 
   SIM900.println(F("AT+CIPCLOSE"));
   delay(2000);
