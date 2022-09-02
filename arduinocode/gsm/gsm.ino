@@ -25,9 +25,9 @@ void setup()
     SIM900.begin(9600);  
     delay(1000);
     Serial.println("Serial For GSM Started");
-//    testGSM();
+   testGSM();
 //  postReq(postURL,api_key,11,900,1);
-  getReq(getURL);
+  // getReq(getURL);
 //set_simcard();
 //send_data(22,300);
 }
