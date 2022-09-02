@@ -540,8 +540,8 @@ int getSimSignal(){
   
   String signal=dataResult.outputCom;
   signal.trim();
-  Serial.println("1:"+signal);
-  Serial.println("2:"+(signal.substring(signal.indexOf('+CSQ:')+2, signal.indexOf(','))));
+//  Serial.println("1:"+signal);
+//  Serial.println("2:"+(signal.substring(signal.indexOf('+CSQ:')+2, signal.indexOf(','))));
   int safeVar=(signal.substring(signal.indexOf('+CSQ:')+1, signal.indexOf(','))).toInt();
   if (!safeVar) {
     return 0;
