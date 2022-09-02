@@ -15,20 +15,20 @@ SoftwareSerial SIM900(11,10);//TX,RX
 
 // Relay
 #define relay 7
-int relayStat=0;
+int relayStat = 0;
 
 // Lampu
-int sensorPin = A5;
+#define sensorPin A5
 int sensorValue = 0;
 
 // HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = A1;
-const int LOADCELL_SCK_PIN = A0;
-float calibration_factor = 242.01;
+#define LOADCELL_DOUT_PIN A1
+#define LOADCELL_SCK_PIN A0
+const float calibration_factor = 242.01;
 
 long int currentTime=millis();
 long int pastTime=millis();
-int sendingDelay=10000;
+const int sendingDelay=10000;
 
 // LCD wiring
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
@@ -40,27 +40,10 @@ HX711 scale;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-float Celcius=0, berat=0;
+float suhu=0, berat=0;
 
-String idAlat="F001";
-String postURL="http://203.142.74.174:3280/api/logdata/store";
-
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  SIM900.begin(9600);
-  sensors.begin(); // sensor ds18b20
-  pinMode(relay,OUTPUT);
-  digitalWrite(relay, HIGH);
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("-DryFISH- Berat");
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-  scale.set_scale(calibration_factor);       
-  scale.tare();
-}
+char idAlat[] = "F001";
+char postURL[] = "http://203.142.74.174:3280/api/logdata/store";
 
 String contentJson(String idAlat,float suhu,float berat,boolean lampu){
   String test="{\"data\":{\"device\":\""+idAlat+"\",\"suhu\":"+String(suhu)+",\"berat\":"+String(berat)+",\"lampu\":"+String(lampu)+"}}";
@@ -98,22 +81,40 @@ String GSMCommand(String commmand,int timeoutProcess=500,int charLastReceivedTim
   Serial.println("-----------------------");
   return result;
 }
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  SIM900.begin(9600);
+  sensors.begin(); // sensor ds18b20
+  pinMode(relay,OUTPUT);
+  digitalWrite(relay, HIGH);
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("-DryFISH- Berat");
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.set_scale(calibration_factor);       
+  scale.tare();
+}
+
 void postReq(String url,String idAlat,float suhu,float berat,boolean lampu){
-  String content=contentJson(idAlat,suhu,berat,lampu);
+  String content = contentJson(idAlat,suhu,berat,lampu);
 //  Serial.println(content);
   GSMCommand("AT+SAPBR=0,1",3000,3000);
   GSMCommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"");
   GSMCommand("AT+SAPBR=3,1,\"APN\",\"internet\"");
   GSMCommand("AT+SAPBR=1,1",3000,3000);
-  GSMCommand("AT+HTTPINIT");
-  GSMCommand("AT+HTTPPARA=\"CID\",1");
+  GSMCommand(F("AT+HTTPINIT"));
+  GSMCommand(F("AT+HTTPPARA=\"CID\",1"));
   GSMCommand("AT+HTTPPARA=\"URL\",\""+url+"\"");
   GSMCommand("AT+HTTPPARA=\"CONTENT\",\"application/vnd.api+json\"");
   GSMCommand("AT+HTTPDATA=" + String(content.length()) + ",10000");
   GSMCommand(content);
   GSMCommand("AT+HTTPACTION=1",7000,5000);
-  GSMCommand("AT+GMR");
-  GSMCommand("AT+HTTPREAD");
+  GSMCommand(F("AT+GMR"));
+  GSMCommand(F("AT+HTTPREAD"));
 }
 
 
@@ -122,20 +123,20 @@ void loop() {
   get_berat();
   get_suhu();
   lampu();
-  currentTime=millis();
-  if(currentTime-pastTime>sendingDelay){
-    Serial.println("Sending Data...........");
-    delay(1000);
-    postReq(postURL,idAlat,Celcius,berat,relayStat);
-    pastTime=millis();
-  }
+//  currentTime=millis();
+//  if(currentTime-pastTime>sendingDelay){
+//    Serial.println("Sending Data...........");
+//    delay(1000);
+      postReq(postURL,idAlat,suhu,berat,relayStat);
+//    pastTime=millis();
+//  }
 }
 
 void get_suhu(){
   sensors.requestTemperatures();
-  Celcius=sensors.getTempCByIndex(0);
+  suhu=sensors.getTempCByIndex(0);
   lcd.setCursor(1,1);
-  lcd.print(Celcius,1);
+  lcd.print(suhu,1);
   lcd.print(" C  ");
 }
 void get_berat(){
