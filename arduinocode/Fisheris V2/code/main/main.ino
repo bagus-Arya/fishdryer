@@ -23,7 +23,7 @@ const String deviceId="FD001";
 #define ONE_WIRE_BUS A7
 
 //PINS RELAY
-#define RELAY 13
+#define RELAY 7
 
 //Struct GSM
 struct GSMCommandOutput{
@@ -42,8 +42,8 @@ DallasTemperature sensors(&oneWire);
 float calibration_factor = 31.41; //HX711 CALIBRATION FACTOR
 
 //URL HTTP
-const String postUrl="http://ptsv2.com/t/ozsqu-1662125812/post";
-const String getUrl="http://ptsv2.com/t/ozsqu-1662125812/post";
+const String postUrl="http://ptsv2.com/t/7vvz7-1662298931/post";
+const String getUrl="http://ptsv2.com/t/7vvz7-1662298931/post";
 
 //custom char
 const byte tempIcon[] = {
@@ -106,7 +106,7 @@ int relayOffSens=100;
 // Sending Timer
 unsigned long curretTime;
 unsigned long pastSentTime;
-const int sendDelay =10000;
+const int sendDelay =30000;
 
 void writeLCD(String msg,int row=0,int collum=0){
   lcd.setCursor(collum,row);//collum,row
@@ -376,9 +376,13 @@ void GSMpowerOn()
 }
 
 GSMCommandOutput GSMCommand(String commmand,int timeoutProcess=500,int charLastReceivedTimeout=500){
-  Serial.println(F(""));
-  Serial.println(F("---------------------------------------------------------------------------------------------------------------------------"));
-  Serial.println(F("-GSM COMMANDS-"));
+  if (commmand.indexOf("AT+CSQ")==-1)
+  {
+      Serial.println(F(""));
+      Serial.println(F("---------------------------------------------------------------------------------------------------------------------------"));
+      Serial.println(F("-GSM COMMANDS-"));
+  }
+ 
   GSMCommandOutput output;
   String result;
   boolean status=false;
@@ -445,7 +449,7 @@ GSMCommandOutput GSMCommand(String commmand,int timeoutProcess=500,int charLastR
   {
      output.status=true;
   }
-  else if (result.indexOf("AT+HTTPREAD")!=-1 && result.indexOf("+HTTPREAD")!=-1)
+  else if (result.indexOf("AT+HTTPREAD")!=-1 && result.indexOf("+HTTPREAD")!=-1 && ((result.indexOf("200")!=-1 || result.indexOf("201")!=-1)))
   {
      output.status=true;
   }
@@ -461,14 +465,18 @@ GSMCommandOutput GSMCommand(String commmand,int timeoutProcess=500,int charLastR
       output.status=false;
     }
   }
-  Serial.println("Input Command : " +output.inputCom);
-  Serial.println("Status : " +String(output.status));
-  Serial.println(F("Output Command ["));
-  Serial.println(output.outputCom);
-  Serial.println(F("]"));
-  Serial.println(F("-GSM COMMANDS END-"));
-  Serial.println(F("---------------------------------------------------------------------------------------------------------------------------"));
-  Serial.println(F(""));
+  if (commmand.indexOf("AT+CSQ")==-1)
+  {
+      Serial.println("Input Command : " +output.inputCom);
+      Serial.println("Status : " +String(output.status));
+      Serial.println(F("Output Command ["));
+      Serial.println(output.outputCom);
+      Serial.println(F("]"));
+      Serial.println(F("-GSM COMMANDS END-"));
+      Serial.println(F("---------------------------------------------------------------------------------------------------------------------------"));
+      Serial.println(F(""));
+  }
+ 
   return output;
 }
 
@@ -517,7 +525,14 @@ void postReq(String content){
   GSMCommand("AT+HTTPPARA=\"CONTENT\",\"application/json\"");
   GSMCommand("AT+HTTPDATA=" + String(content.length()) + ",10000");
   GSMCommand(content);
-  GSMCommand("AT+HTTPACTION=1",7000,5000);
+  GSMCommandOutput checkOutput = GSMCommand("AT+HTTPACTION=1",7000,5000);
+  clearLCD(0,0,0,1);
+  if(checkOutput.status!=0){
+    
+    writeLCD("-Data Sent-",3,5);
+  }else{
+    writeLCD("-Failed to Send-",3,2);
+  }
   GSMCommand("AT+HTTPREAD",3000,3000);
 }
 
@@ -540,8 +555,8 @@ int getSimSignal(){
   
   String signal=dataResult.outputCom;
   signal.trim();
-//  Serial.println("1:"+signal);
-//  Serial.println("2:"+(signal.substring(signal.indexOf('+CSQ:')+2, signal.indexOf(','))));
+  // Serial.println("1:"+signal);
+  // Serial.println("2:"+(signal.substring(signal.indexOf('+CSQ:')+2, signal.indexOf(','))));
   int safeVar=(signal.substring(signal.indexOf('+CSQ:')+1, signal.indexOf(','))).toInt();
   if (!safeVar) {
     return 0;
@@ -555,8 +570,17 @@ void updateMainDisplay(){
 
   Serial.println(F("Module Status"));
 
-  float fltTmlTemp=getTemperature();
+  
   String strTmlTemp;
+  String strTmlSignal;
+  String strTmlWeight;
+  String strTmlLux;
+  float fltTmlTemp=getTemperature();
+  int fltTmlSignalStat=getSimSignal();
+  float fltTmlWeight=getWeight();
+  float fltTmlLux=getLux();
+
+  
   Serial.println("temp : " + String(fltTmlTemp)+" C"); 
   if(fltTmlTemp>=100){
     strTmlTemp=":"+String(fltTmlTemp,0)+"C ";
@@ -587,8 +611,7 @@ void updateMainDisplay(){
   writeLCDIcon("relayIcon",1,9);
   writeLCD(strTmlTemp.substring(0, 5),1,10);
 
-  String strTmlSignal;
-  int fltTmlSignalStat=getSimSignal();
+ 
   Serial.println("GSM signal : " +String(fltTmlSignalStat));
   if(fltTmlSignalStat>9){
     strTmlSignal=":"+String(fltTmlSignalStat);
@@ -602,8 +625,7 @@ void updateMainDisplay(){
   writeLCD(strTmlSignal.substring(0, 5),1,16);
 
   
-  String strTmlWeight;
-  float fltTmlWeight=getWeight();
+
   Serial.println("weight : " + String(fltTmlWeight)+" Gram");
   if (fltTmlWeight>=10000)
   {
@@ -619,8 +641,7 @@ void updateMainDisplay(){
   else{
     strTmlWeight=":"+String(int(fltTmlWeight))+"g ";
   }
-  String strTmlLux;
-  float fltTmlLux=getLux();
+
   Serial.println("Lux : " + String(fltTmlLux)+" Lx");
   if (fltTmlLux>=100000)
   {
@@ -635,10 +656,10 @@ void updateMainDisplay(){
   }
   else if (fltTmlLux>=100)
   {
-    strTmlLux=":"+String(int(fltTmlLux))+"LX";
+    strTmlLux=":"+String(int(fltTmlLux))+"Lx";
   } 
   else{
-    strTmlLux=":"+String(int(fltTmlLux))+"LX";
+    strTmlLux=":"+String(int(fltTmlLux))+"Lx";
   }
   int middleling=(20-(strTmlWeight.length()+strTmlLux.length())-1)/2;
   clearLCD(0,0,1,0);
