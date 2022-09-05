@@ -42,7 +42,7 @@ DallasTemperature sensors(&oneWire);
 float calibration_factor = 31.41; //HX711 CALIBRATION FACTOR
 
 //URL HTTP
-const String postUrl="http://ptsv2.com/t/7vvz7-1662298931/post";
+const String postUrl="https://risetndev.com/api/logdata/store";
 const String getUrl="http://ptsv2.com/t/7vvz7-1662298931/post";
 
 //custom char
@@ -522,7 +522,7 @@ void postReq(String content){
   GSMCommand("AT+HTTPINIT");
   GSMCommand("AT+HTTPPARA=\"CID\",1");
   GSMCommand("AT+HTTPPARA=\"URL\",\""+postUrl+"\"",3000,2000);
-  GSMCommand("AT+HTTPPARA=\"CONTENT\",\"application/json\"");
+  GSMCommand("AT+HTTPPARA=\"CONTENT\",\"application/vnd.api+json\"");
   GSMCommand("AT+HTTPDATA=" + String(content.length()) + ",10000");
   GSMCommand(content);
   GSMCommandOutput checkOutput = GSMCommand("AT+HTTPACTION=1",7000,5000);
