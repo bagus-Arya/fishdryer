@@ -382,7 +382,9 @@ GSMCommandOutput GSMCommand(String commmand,int timeoutProcess=500,int charLastR
       Serial.println(F("---------------------------------------------------------------------------------------------------------------------------"));
       Serial.println(F("-GSM COMMANDS-"));
   }
- 
+  while(Serial3.available()){
+    Serial3.read();
+  }
   GSMCommandOutput output;
   String result;
   boolean status=false;
