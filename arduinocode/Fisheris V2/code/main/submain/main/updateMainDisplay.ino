@@ -3,7 +3,6 @@ void updateMainDisplay(){
 
   Serial.println(F("Module Status"));
 
-  
   String strTmlTemp;
   String strTmlSignal;
   String strTmlWeight;
@@ -56,8 +55,6 @@ void updateMainDisplay(){
   clearLCD(1,15,19);
   writeLCDIcon("signalIcon",1,15);
   writeLCD(strTmlSignal.substring(0, 5),1,16);
-
-  
 
   Serial.println("weight : " + String(fltTmlWeight)+" Gram");
   if (fltTmlWeight>=10000)

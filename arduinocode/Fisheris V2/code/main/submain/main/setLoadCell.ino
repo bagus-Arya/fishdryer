@@ -1,5 +1,3 @@
-float calibration_factor = 31.41; //HX711 CALIBRATION FACTOR
-
 void setupLoadCell(){
   clearLCD(0,1,1,1);
   Serial.println(F(""));
