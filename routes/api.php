@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SensorDataApiController;
 use App\Http\Controllers\NonRefreshController;
+use App\Http\Controllers\BypassTls;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -25,3 +26,5 @@ Route::get('/show/{sensordata}',[SensorDataApiController::class,'show']);
 Route::get('/livedata',[NonRefreshController::class,'livedata'])->name('livedata');
 Route::get('/livesearch',[NonRefreshController::class,'livesearch'])->name('livesearch');
 Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);
+Route::post('/store',[SensorDataApiController::class,'poststore']);
+Route::post('/bypasstls',[BypassTls::class,'index']);
