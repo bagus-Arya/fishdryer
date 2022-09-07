@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+Use \Carbon\Carbon;
 
 class Device extends Model
 {
@@ -20,4 +21,9 @@ class Device extends Model
     protected $hidden = [
         'api_key',
     ];
+     public function getOnlineStatusAttribute()
+    { 
+        $dateNow = Carbon::now();
+      return ($this->updated_at)->diffInSeconds($dateNow)<60 ? True:False;
+    }
 }

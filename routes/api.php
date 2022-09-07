@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SensorDataApiController;
+use App\Http\Controllers\NonRefreshController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,16 +19,9 @@ use App\Http\Controllers\SensorDataApiController;
 //     return $request->user();
 // });
 
-<<<<<<< HEAD
-Route::get('/index/{apikey}',[SensorDataApiController::class,'index']);
-Route::get('/show/{apikey}/{sensordata}',[SensorDataApiController::class,'show']);
-Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);
-=======
 Route::get('/index',[SensorDataApiController::class,'index']);
 Route::get('/showlatest',[SensorDataApiController::class,'showlatest']);
 Route::get('/show/{sensordata}',[SensorDataApiController::class,'show']);
 Route::get('/livedata',[NonRefreshController::class,'livedata'])->name('livedata');
 Route::get('/livesearch',[NonRefreshController::class,'livesearch'])->name('livesearch');
 Route::get('/store/{apikey}/{suhu}/{berat}/{lampu}',[SensorDataApiController::class,'store']);
-Route::post('/store',[SensorDataApiController::class,'poststore']);
->>>>>>> efd67cdc57ee9b5786478c42ebbe7d5ee45a7fbd
