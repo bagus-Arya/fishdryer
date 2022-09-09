@@ -42,7 +42,8 @@ DallasTemperature sensors(&oneWire);
 float calibration_factor = 31.41; //HX711 CALIBRATION FACTOR
 
 //URL HTTP
-const String postUrl="https://risetndev.com/api/logdata/store";
+const String postTargetUrl="https://risetndev.com/api/logdata/store";
+const String postBypassUrl="http://fishdryer.stiki-indonesia.ac.id/api/bypasstls";
 const String getUrl="http://ptsv2.com/t/7vvz7-1662298931/post";
 
 //custom char
@@ -102,6 +103,8 @@ int simSignal;
 float weight,temp,lux;
 boolean relayStat=0;
 int relayOffSens=100;
+const String latitude="90.000000";
+const String longitude="180.000000";
 
 // Sending Timer
 unsigned long curretTime;
@@ -346,22 +349,22 @@ boolean getAndUpdateRelayStat(){
   return relayStat;
 }
 
-String serilizeJson(String device="FD001",float weight=50000,float temp=200,float lux=1000000,boolean relay=true,String latitude="09876543",String longitude="6789098765"){
-  StaticJsonDocument<150> doc;
+String serilizeJson(String deviceId=deviceId,float weight=weight,float temp=temp,float lux=lux,boolean relayStat=relayStat,String latitude=latitude,String longitude=longitude){
+  StaticJsonDocument<200> doc;
 
-  JsonObject data = doc.createNestedObject("data");
-  data["device"] = device;
-  data["weight"] = weight;
-  data["temp"] = temp;
-  data["lux"] = lux;
-  data["relay"] = relay;
+  doc["url"] = postTargetUrl;
+  JsonObject dump_data = doc["dump"].createNestedObject("data");
+  dump_data["device"] = deviceId;
+  dump_data["weight"] = weight;
+  dump_data["temp"] = temp;
+  dump_data["lux"] = lux;
+  dump_data["relay"] = relayStat;
   
-  JsonObject data_location = data.createNestedObject("location");
-  data_location["lat"] = latitude;
-  data_location["long"] = longitude;
+  JsonObject dump_data_location = dump_data.createNestedObject("location");
+  dump_data_location["latitude"] = latitude;
+  dump_data_location["longitude"] = longitude;
   String serilize;
   serializeJson(doc, serilize);
-//  String output="{\"api_key\":\""+api_key+"\",\"suhu\":"+(suhu)+",\"berat\":"+String(berat)+",\"lampu\":"+String(lampu)+"}";
   return serilize;
 }
 
@@ -523,7 +526,7 @@ void postReq(String content){
   GSMCommand("AT+SAPBR=1,1",3000,3000);
   GSMCommand("AT+HTTPINIT");
   GSMCommand("AT+HTTPPARA=\"CID\",1");
-  GSMCommand("AT+HTTPPARA=\"URL\",\""+postUrl+"\"",3000,2000);
+  GSMCommand("AT+HTTPPARA=\"URL\",\""+postBypassUrl+"\"",3000,2000);
   GSMCommand("AT+HTTPPARA=\"CONTENT\",\"application/vnd.api+json\"");
   GSMCommand("AT+HTTPDATA=" + String(content.length()) + ",10000");
   GSMCommand(content);
